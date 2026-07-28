@@ -1,11 +1,17 @@
-from fastapi import FastAPI
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-import models
-from database import Base, engine
-from routers import registrations
+database_url = "postgresql://postgres:postgres@localhost:5432/pos_db"
 
-Base.metadata.create_all(bind=engine)
+engine = create_engine(database_url,echo = False, future = True)
 
-app = FastAPI(title = 'DADASAFE API', version = "1.0" )
+session = sessionmaker(autocommit = False, autoflash = False, bind = engine)
 
-app.include_router(registrations.router)
+Base = declarative_base()
+
+def get_db():
+    db = session()
+    try:
+        yield db
+    finally:
+        db.close()
