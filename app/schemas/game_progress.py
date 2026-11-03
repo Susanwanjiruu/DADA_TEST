@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+
+from pydantic import BaseModel, Field
+
 from app.models.game_progress import CompletionStatus
 
 
@@ -10,7 +12,9 @@ class GameProgressCreate(BaseModel):
 
 
 class GameProgressUpdate(BaseModel):
-    score: Optional[int] = None
+    # The project has no shared maximum-score definition, so enforce the
+    # universal constraint (non-negative) without inventing a game-specific cap.
+    score: Optional[int] = Field(default=None, ge=0)
     completion_status: CompletionStatus
 
 
