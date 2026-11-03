@@ -50,7 +50,7 @@ class PublicRegistrationSecurityTests(unittest.TestCase):
     @patch.object(registration_service, "hash_password", return_value="hashed-password")
     @patch.object(registration_service, "RegistrationRepository", FakeRegistrationRepository)
     def test_public_registration_always_assigns_player_role(
-        self, mock_repository, mock_hash_password, mock_encrypt_phone
+        self, mock_hash_password, mock_encrypt_phone
     ):
         data = RegistrationCreate(**self.valid_payload())
 
