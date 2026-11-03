@@ -9,6 +9,7 @@ from database import Base
 class ActionType(str, enum.Enum):
     ban_user = "ban_user"
     suspend_user = "suspend_user"
+    activate_user = "activate_user"
     enable_feature = "enable_feature"
     disable_feature = "disable_feature"
 
