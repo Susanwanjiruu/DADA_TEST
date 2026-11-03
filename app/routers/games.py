@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -11,14 +11,13 @@ from app.services import games as game_service
 router = APIRouter(prefix="/games", tags=["Games"])
 
 
-@router.get("", response_model=list[GameRead])
+@router.get("")
 def get_games(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: Registration = Depends(get_current_user),
-):
-    
+) -> list[GameRead]:
     return game_service.list_games(db, skip=skip, limit=limit)
 
 
@@ -37,7 +36,6 @@ def create_game(
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
-   
     return game_service.create_game(db, data, creator=current_admin)
 
 
@@ -48,7 +46,6 @@ def update_game(
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
-    
     return game_service.update_game(db, game_id, data)
 
 
@@ -58,5 +55,4 @@ def delete_game(
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
-    
     game_service.delete_game(db, game_id)
