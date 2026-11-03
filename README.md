@@ -25,7 +25,7 @@ The backend uses SQLAlchemy for database access and environment-based configurat
 │   ├── repositories/  # Database access operations
 │   ├── routers/       # FastAPI route definitions
 │   ├── schemas/       # Request and response schemas
-│   └── services/     # Business logic
+│   └── services/      # Business logic
 ├── database.py        # SQLAlchemy engine and session setup
 ├── main.py            # FastAPI application entry point
 ├── requirements.txt
@@ -36,7 +36,7 @@ The backend uses SQLAlchemy for database access and environment-based configurat
 
 - Python 3.10 or newer
 - PostgreSQL
-- The Python packages required by the application
+- The Python packages listed in `requirements.txt`
 
 ## Local setup
 
@@ -74,8 +74,6 @@ The backend uses SQLAlchemy for database access and environment-based configurat
 
 ## Configuration
 
-The application reads these settings from environment variables:
-
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | SQLAlchemy database connection URL |
@@ -88,12 +86,16 @@ The application reads these settings from environment variables:
 
 Keep real credentials in your local `.env` file or deployment secret manager. Never commit `.env` or production secrets.
 
+## Registration and roles
+
+Public signup is available through `POST /auth/register`. Every account created through this endpoint is assigned the `player` role by the server. The public request schema does not accept a `user_type` field, preventing callers from assigning themselves administrator or support-provider privileges.
+
 ## API documentation
 
 When the application is running, FastAPI serves Swagger UI at `/docs` and ReDoc at `/redoc`.
 
 ## Notes
 
-- Run the API from the repository root so the application imports resolve as expected.
+- Run the API from the repository root so application imports resolve as expected.
 - Configure a PostgreSQL database before starting the service.
 - The example environment file contains placeholders only; replace them with valid local configuration.
