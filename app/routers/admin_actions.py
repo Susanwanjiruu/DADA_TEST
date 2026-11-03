@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -12,10 +12,9 @@ router = APIRouter(prefix="/admin/actions", tags=["Admin Audit Log"])
 
 @router.get("", response_model=list[AdminActionRead])
 def get_admin_actions(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
-    
     return action_service.list_actions(db, skip=skip, limit=limit)
