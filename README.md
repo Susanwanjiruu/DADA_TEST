@@ -88,7 +88,21 @@ Keep real credentials in your local `.env` file or deployment secret manager. Ne
 
 ## Registration and roles
 
-Public signup is available through `POST /auth/register`. Every account created through this endpoint is assigned the `player` role by the server. The public request schema does not accept a `user_type` field, preventing callers from assigning themselves administrator or support-provider privileges.
+Public signup is available through `POST /auth/register`. Every account created through this endpoint is assigned the `player` role by the server. The public request schema does not accept a `user_type` field, preventing callers from assigning themselves administrator or support-provider privileges. Administrator account-status changes (ban, suspend, and reactivate) are written to the admin audit log.
+
+## Database migration
+
+Existing PostgreSQL databases must apply the SQL migration in `migrations/20261103_add_activate_user_action.sql` before deploying the account-reactivation audit change. It adds `activate_user` to the existing `actiontype` enum used by the admin audit log.
+
+## Tests
+
+Run the automated tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+List endpoints use validated pagination: `skip` must be zero or greater, and `limit` must be between 1 and 100.
 
 ## API documentation
 
