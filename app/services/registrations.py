@@ -1,8 +1,9 @@
 import uuid
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.registrations import Registration, AccountStatus, UserType
+from app.models.admin_actions import ActionType
 from app.repositories.registrations import RegistrationRepository
 from app.schemas.registrations import (
     RegistrationCreate,
@@ -17,6 +18,7 @@ from app.core.security import (
     encrypt_phone,
     create_access_token,
 )
+from app.services.admin_actions import log_action
 
 
 def register_new_user(db: Session, data: RegistrationCreate) -> Registration:
@@ -80,11 +82,41 @@ def admin_list_users(db: Session, skip: int = 0, limit: int = 100) -> list[Regis
     return repo.list_all(skip=skip, limit=limit)
 
 
-def admin_toggle_status(db: Session, target_user_id: uuid.UUID, data: AdminStatusUpdate) -> Registration:
+def admin_toggle_status(
+    db: Session,
+    target_user_id: uuid.UUID,
+    data: AdminStatusUpdate,
+    admin_id: uuid.UUID,
+) -> Registration:
     repo = RegistrationRepository(db)
     user = repo.get_by_id(target_user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user.account_status = data.account_status
+    previous_status = user.account_status
+    new_status = data.account_status
+
+    if previous_status == new_status:
+        return user
+
+    action_by_status = {
+        AccountStatus.banned: ActionType.ban_user,
+        AccountStatus.suspended: ActionType.suspend_user,
+        AccountStatus.active: ActionType.activate_user,
+    }
+
+    user.account_status = new_status
+
+    # The audit action and account update use the same SQLAlchemy session.
+    # log_action commits both together, preventing an unlogged status change.
+    log_action(
+        db=db,
+        admin_id=admin_id,
+        action_type=action_by_status[new_status],
+        details=(
+            f"Changed account {target_user_id} status "
+            f"from {previous_status.value} to {new_status.value}"
+        ),
+    )
+
     return repo.update(user)
