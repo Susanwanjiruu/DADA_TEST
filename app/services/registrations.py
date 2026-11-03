@@ -2,7 +2,7 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.registrations import Registration, AccountStatus
+from app.models.registrations import Registration, AccountStatus, UserType
 from app.repositories.registrations import RegistrationRepository
 from app.schemas.registrations import (
     RegistrationCreate,
@@ -29,7 +29,7 @@ def register_new_user(db: Session, data: RegistrationCreate) -> Registration:
         registration_id=uuid.uuid4(),
         email=data.email,
         hashed_password=hash_password(data.password),
-        user_type=data.user_type,
+        user_type=UserType.player,
         name=data.name,
         gender=data.gender,
         encrypted_phone_number=encrypt_phone(data.phone_number) if data.phone_number else None,
