@@ -7,10 +7,12 @@ from app.models.registrations import UserType, Gender, AccountStatus
 class RegistrationCreate(BaseModel):
     email: EmailStr
     password: str
-    user_type: UserType
     name: str
     gender: Gender
-    phone_number: Optional[str] = None  
+    phone_number: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
     @field_validator("password")
     @classmethod
     def password_strength(cls, v: str) -> str:
@@ -31,13 +33,11 @@ class RegistrationRead(BaseModel):
     account_status: AccountStatus
 
     model_config = {"from_attributes": True}
-   
 
 
 class RegistrationUpdate(BaseModel):
     name: Optional[str] = None
     avatar_id: Optional[uuid.UUID] = None
-
 
 
 class AdminStatusUpdate(BaseModel):
