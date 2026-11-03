@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -48,8 +48,8 @@ def update_user_profile(
 
 @router.get("/admin/registrations", response_model=list[RegistrationRead])
 def admin_list_all_users(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
@@ -64,5 +64,10 @@ def admin_modify_user_status(
     db: Session = Depends(get_db),
     current_admin: Registration = Depends(require_admin),
 ):
-    """Admin-only. Bans, suspends, or reactivates an account."""
-    return registration_service.admin_toggle_status(db, target_user_id=registration_id, data=data)
+    """Admin-only. Changes account status and records the action in the audit log."""
+    return registration_service.admin_toggle_status(
+        db,
+        target_user_id=registration_id,
+        data=data,
+        admin_id=current_admin.registration_id,
+    )
